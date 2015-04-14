@@ -1,0 +1,24 @@
+{
+  "name": "nesly-assembler",
+  "version": "1.0.0",
+  "description": "6502 assembler in js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emkay/nesly-assembler.git"
+  },
+  "keywords": [
+    "8-bit",
+    "assembler",
+    "nes"
+  ],
+  "author": "Michael Matuzak",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/emkay/nesly-assembler/issues"
+  },
+  "homepage": "https://github.com/emkay/nesly-assembler"
+}
