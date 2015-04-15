@@ -1,8 +1,8 @@
 var fs = require('fs');
-var analyse = require('./analyzer');
-var c6502 = require('./c6502');
-var cartridge = require('./cartridge');
-var directives = require('./directives');
+var analyse = require('./lib/analyzer');
+var c6502 = require('./lib/c6502');
+var cartridge = require('./lib/cartridge');
+var directives = require('./lib/directives');
 
 function Compiler() {
 
@@ -36,7 +36,6 @@ Compiler.prototype.open_file = function (file){
 };
 
 Compiler.prototype.write_file = function(filename, data){
-    console.log('write_file');
     fs.writeFileSync(filename, data, 'binary');
 };
 
@@ -343,7 +342,7 @@ Compiler.prototype.get_labels = function(ast){
 };
 
 Compiler.prototype.semantic = function(ast, iNES){
-    var cart = new cartridge.Cartridge();
+    var cart = new cartridge();
     var labels = this.get_labels(ast);
     //find all labels o the symbol table
     var erros = [];
