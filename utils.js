@@ -1,4 +1,4 @@
-var util = function(){};
+function util(){}
 
 util.prototype.path = '';
 

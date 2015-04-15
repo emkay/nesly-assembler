@@ -1,4 +1,4 @@
-var analyse = function(code, tokenTypes){
+module.exports = function(code, tokenTypes){
     code += ' ';
     var tokens = [];
     var line = 1;
@@ -56,9 +56,3 @@ var analyse = function(code, tokenTypes){
         return tokens;
     }
 };
-
-function Analyzer (){
-    this.analyse = analyse;
-}
-
-module.exports = Analyzer;

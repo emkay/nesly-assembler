@@ -99,8 +99,4 @@ Cartridge.prototype.get_ines_code = function() {
     return bin;
 };
 
-function Wrapper() {
-    this.Cartridge = Cartridge;
-}
-
-module.exports = Wrapper;
+module.exports = Cartridge;

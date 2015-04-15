@@ -1,9 +1,10 @@
-var analyzer = new require('./analyzer')();
-var c6502 = new require('./c6502')()
-var cartridge = new require('./cartridge')();
-var directives = new require('./directives')();
+var fs = require('fs');
+var analyse = require('./analyzer');
+var c6502 = require('./c6502');
+var cartridge = require('./cartridge');
+var directives = require('./directives');
 
-var compiler = function(){};
+function compiler(){}
 
 var asm65_tokens = [
     {type:'T_INSTRUCTION', regex:/^(ADC|AND|ASL|BCC|BCS|BEQ|BIT|BMI|BNE|BPL|BRK|BVC|BVS|CLC|CLD|CLI|CLV|CMP|CPX|CPY|DEC|DEX|DEY|EOR|INC|INX|INY|JMP|JSR|LDA|LDX|LDY|LSR|NOP|ORA|PHA|PHP|PLA|PLP|ROL|ROR|RTI|RTS|SBC|SEC|SED|SEI|STA|STX|STY|TAX|TAY|TSX|TXA|TXS|TYA)[ \n\t\r]{1}/i, store:true},
@@ -28,8 +29,17 @@ var asm65_tokens = [
     {type:'T_COMMENT', regex:/^(;[^\n]*)/, store:false}
 ];
 
+compiler.prototype.open_file = function (file){
+    return fs.readFileSync(file, 'binary');
+};
+
+compiler.prototype.write_file = function(filename, data){
+    console.log('write_file');
+    fs.writeFileSync(filename, data, 'binary');
+};
+
 compiler.prototype.lexical = function(code){
-    return analyzer.analyse(code, asm65_tokens);
+    return analyse(code, asm65_tokens);
 };
 
 function look_ahead(tokens, index, type, value){
@@ -445,6 +455,7 @@ compiler.prototype.nes_compiler = function(code){
     try {
         tokens = this.lexical(code);
     } catch (e){
+        console.error(e);
         tokens = e.tokens;
         erros = erros.concat(e.erros);
     }
@@ -452,6 +463,7 @@ compiler.prototype.nes_compiler = function(code){
     try {
         ast = this.syntax(tokens);
     } catch (e){
+        console.error(e);
         ast = e.ast;
         erros = erros.concat(e.erros);
     }
@@ -459,6 +471,7 @@ compiler.prototype.nes_compiler = function(code){
     try {
         opcodes = this.semantic(ast, true);
     }catch (e){
+        console.error(e);
         erros = erros.concat(e.erros);
     }
     if (erros.length > 0){
