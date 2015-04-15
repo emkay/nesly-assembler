@@ -4,7 +4,9 @@ var c6502 = require('./c6502');
 var cartridge = require('./cartridge');
 var directives = require('./directives');
 
-function compiler(){}
+function Compiler() {
+
+}
 
 var asm65_tokens = [
     {type:'T_INSTRUCTION', regex:/^(ADC|AND|ASL|BCC|BCS|BEQ|BIT|BMI|BNE|BPL|BRK|BVC|BVS|CLC|CLD|CLI|CLV|CMP|CPX|CPY|DEC|DEX|DEY|EOR|INC|INX|INY|JMP|JSR|LDA|LDX|LDY|LSR|NOP|ORA|PHA|PHP|PLA|PLP|ROL|ROR|RTI|RTS|SBC|SEC|SED|SEI|STA|STX|STY|TAX|TAY|TSX|TXA|TXS|TYA)[ \n\t\r]{1}/i, store:true},
@@ -29,16 +31,16 @@ var asm65_tokens = [
     {type:'T_COMMENT', regex:/^(;[^\n]*)/, store:false}
 ];
 
-compiler.prototype.open_file = function (file){
+Compiler.prototype.open_file = function (file){
     return fs.readFileSync(file, 'binary');
 };
 
-compiler.prototype.write_file = function(filename, data){
+Compiler.prototype.write_file = function(filename, data){
     console.log('write_file');
     fs.writeFileSync(filename, data, 'binary');
 };
 
-compiler.prototype.lexical = function(code){
+Compiler.prototype.lexical = function(code){
     return analyse(code, asm65_tokens);
 };
 
@@ -222,7 +224,7 @@ var asm65_bnf = [
     {type:'S_IMPLIED', bnf:[t_instruction]}
 ];
 
-compiler.prototype.syntax = function(tokens){
+Compiler.prototype.syntax = function(tokens){
     var ast = [];
     var x = 0;
     var labels = [];
@@ -313,7 +315,7 @@ function get_value(token, labels){
     throw "Could not get that value";
 }
 
-compiler.prototype.get_labels = function(ast){
+Compiler.prototype.get_labels = function(ast){
     var labels = {};
     var address = 0;
     for (var la in ast){
@@ -340,7 +342,7 @@ compiler.prototype.get_labels = function(ast){
     return labels;
 };
 
-compiler.prototype.semantic = function(ast, iNES){
+Compiler.prototype.semantic = function(ast, iNES){
     var cart = new cartridge.Cartridge();
     var labels = this.get_labels(ast);
     //find all labels o the symbol table
@@ -449,13 +451,12 @@ compiler.prototype.semantic = function(ast, iNES){
     }
 };
 
-compiler.prototype.nes_compiler = function(code){
+Compiler.prototype.nes_compiler = function(code){
     var tokens;
     var erros=[];
     try {
         tokens = this.lexical(code);
     } catch (e){
-        console.error(e);
         tokens = e.tokens;
         erros = erros.concat(e.erros);
     }
@@ -463,7 +464,6 @@ compiler.prototype.nes_compiler = function(code){
     try {
         ast = this.syntax(tokens);
     } catch (e){
-        console.error(e);
         ast = e.ast;
         erros = erros.concat(e.erros);
     }
@@ -471,7 +471,6 @@ compiler.prototype.nes_compiler = function(code){
     try {
         opcodes = this.semantic(ast, true);
     }catch (e){
-        console.error(e);
         erros = erros.concat(e.erros);
     }
     if (erros.length > 0){
@@ -481,4 +480,4 @@ compiler.prototype.nes_compiler = function(code){
     }
 };
 
-module.exports = compiler;
+module.exports = Compiler;
