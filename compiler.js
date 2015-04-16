@@ -3,7 +3,6 @@ var analyse = require('./lib/analyzer');
 var c6502 = require('./lib/c6502');
 var cartridge = require('./lib/cartridge');
 var directives = require('./lib/directives');
-var tokenList = require('./lib/tokens');
 
 function Compiler() {
 
@@ -18,7 +17,7 @@ Compiler.prototype.write_file = function(filename, data){
 };
 
 Compiler.prototype.lexical = function(code){
-    return analyse(code, tokenList);
+    return analyse(code);
 };
 
 function look_ahead(tokens, index, type, value){

@@ -7,7 +7,6 @@ try {
     var bin = compiler.nes_compiler(code);
     compiler.write_file('./build/out.nes', bin);
 } catch (e){
-    console.log('hello');
     console.error(e);
     process.exit(1);
 }
