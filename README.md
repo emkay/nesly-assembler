@@ -1,5 +1,5 @@
 # nesly-assembler
-javascript assembler for 6052 asm
+javascript assembler for 6502 asm
 
 ## nodeNES
 
