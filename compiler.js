@@ -1,8 +1,10 @@
 var fs = require('fs')
 var analyse = require('./lib/analyzer')
-var c6502 = require('./lib/c6502')
+var CPU = require('./lib/c6502')
+var cpu = new CPU()
 var Cartridge = require('./lib/cartridge')
-var directives = require('./lib/directives')
+var Directives = require('./lib/directives')
+var directives = new Directives()
 var asm65_tokens = require('./lib/tokens')
 
 function Compiler () {}
@@ -291,8 +293,7 @@ function get_value (token, labels) {
 Compiler.prototype.get_labels = function (ast) {
   var labels = {}
   var address = 0
-  for (var la in ast) {
-    var leaf = ast[la]
+  ast.forEach(function (leaf) {
     if (leaf.type === 'S_DIRECTIVE' && leaf.children[0].value === '.org') {
       address = parseInt(leaf.children[1].value.substr(1), 16)
     }
@@ -300,7 +301,7 @@ Compiler.prototype.get_labels = function (ast) {
       labels[leaf.labels[0]] = address
     }
     if (leaf.type !== 'S_DIRECTIVE' && leaf.type !== 'S_RS') {
-      var size = c6502.address_mode_def[leaf.type].size
+      var size = cpu.address_mode_def[leaf.type].size
       address += size
     } else if (leaf.type === 'S_DIRECTIVE' && leaf.children[0].value === '.db') {
       for (var i in leaf.children) {
@@ -311,7 +312,7 @@ Compiler.prototype.get_labels = function (ast) {
     } else if (leaf.type === 'S_DIRECTIVE' && leaf.children[0].value === '.incbin') {
       address += 4 * 1024 // TODO check file size
     }
-  }
+  })
   return labels
 }
 
@@ -323,17 +324,20 @@ Compiler.prototype.semantic = function (ast, iNES) {
   var erro
   // Translate opcodes
   var address = 0
-  for (var l in ast) {
-    var leaf = ast[l]
+  ast.forEach(function (leaf) {
     if (leaf.type === 'S_RS') {
       // marker
       labels[leaf.children[0].value] = cart.rs
       cart.rs += get_value(leaf.children[2])
     } else if (leaf.type === 'S_DIRECTIVE') {
+      console.log('yep')
       var directive = leaf.children[0].value
       var argument
+      console.log(directive)
       if (leaf.children.length === 2) {
+        console.log('getting value')
         argument = get_value(leaf.children[1], labels)
+        console.log(argument)
       } else {
         argument = leaf.children.slice(1, leaf.children.length)
       }
@@ -390,8 +394,8 @@ Compiler.prototype.semantic = function (ast, iNES) {
           address = get_value(leaf.children[2], labels)
           break
       }
-      var address_mode = c6502.address_mode_def[leaf.type].short
-      var opcode = c6502.opcodes[instruction.toUpperCase()][address_mode]
+      var address_mode = cpu.address_mode_def[leaf.type].short
+      var opcode = cpu.opcodes[instruction.toUpperCase()][address_mode]
       if (opcode === undefined) {
         erro = {}
         erro.type = 'SEMANTIC ERROR'
@@ -400,7 +404,7 @@ Compiler.prototype.semantic = function (ast, iNES) {
         erros.push(erro)
       } else if (address_mode === 'sngl' || address_mode === 'acc') {
         cart.append_code([opcode])
-      } else if (c6502.address_mode_def[leaf.type].size === 2) {
+      } else if (cpu.address_mode_def[leaf.type].size === 2) {
         cart.append_code([opcode, address])
       } else {
         var arg1 = (address & 0x00ff)
@@ -408,7 +412,7 @@ Compiler.prototype.semantic = function (ast, iNES) {
         cart.append_code([opcode, arg1, arg2])
       }
     }
-  }
+  })
   if (erros.length > 0) {
     var e = new Error()
     e.name = 'Semantic Error'
@@ -443,6 +447,7 @@ Compiler.prototype.nes_compiler = function (code) {
   try {
     opcodes = this.semantic(ast, true)
   } catch (e) {
+    console.log(e)
     erros = erros.concat(e.erros)
   }
   if (erros.length > 0) {
