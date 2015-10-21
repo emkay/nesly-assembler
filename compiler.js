@@ -330,14 +330,10 @@ Compiler.prototype.semantic = function (ast, iNES) {
       labels[leaf.children[0].value] = cart.rs
       cart.rs += get_value(leaf.children[2])
     } else if (leaf.type === 'S_DIRECTIVE') {
-      console.log('yep')
       var directive = leaf.children[0].value
       var argument
-      console.log(directive)
       if (leaf.children.length === 2) {
-        console.log('getting value')
         argument = get_value(leaf.children[1], labels)
-        console.log(argument)
       } else {
         argument = leaf.children.slice(1, leaf.children.length)
       }
@@ -346,6 +342,7 @@ Compiler.prototype.semantic = function (ast, iNES) {
       } else {
         erro = {}
         erro.type = 'Unknown Directive'
+        erro.leafChildren = leaf.children
         erros.push(erro)
       }
     } else {
@@ -447,7 +444,6 @@ Compiler.prototype.nes_compiler = function (code) {
   try {
     opcodes = this.semantic(ast, true)
   } catch (e) {
-    console.log(e)
     erros = erros.concat(e.erros)
   }
   if (erros.length > 0) {
