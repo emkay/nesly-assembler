@@ -4,7 +4,7 @@
   "description": "6502 assembler in js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "standard"
   },
   "repository": {
     "type": "git",
@@ -16,9 +16,12 @@
     "nes"
   ],
   "author": "Michael Matuzak",
-  "license": "BSD",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/emkay/nesly-assembler/issues"
   },
-  "homepage": "https://github.com/emkay/nesly-assembler"
+  "homepage": "https://github.com/emkay/nesly-assembler",
+  "devDependencies": {
+    "standard": "^5.3.1"
+  }
 }

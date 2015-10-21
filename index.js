@@ -1,1 +1,1 @@
-module.exports = require('./compiler');
+module.exports = require('./compiler')
