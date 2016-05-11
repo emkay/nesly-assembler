@@ -431,20 +431,20 @@ Compiler.prototype.nes_compiler = function (code) {
     tokens = this.lexical(code)
   } catch (e) {
     tokens = e.tokens
-    erros = erros.concat(e.erros)
+    erros = erros.concat(e.message)
   }
   var ast
   try {
     ast = this.syntax(tokens)
   } catch (e) {
     ast = e.ast
-    erros = erros.concat(e.erros)
+    erros = erros.concat(e.message)
   }
   var opcodes
   try {
     opcodes = this.semantic(ast, true)
   } catch (e) {
-    erros = erros.concat(e.erros)
+    erros = erros.concat(e.message)
   }
   if (erros.length > 0) {
     throw erros
