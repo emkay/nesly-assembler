@@ -1,0 +1,30 @@
+#!/usr/bin/node
+
+var program = require('commander')
+var Compiler = require('./index')
+var compiler = new Compiler()
+var version = require('./package').version
+
+/**
+ * setup command line parsing
+ */
+program
+  .version(version)
+  .usage('[options]')
+  .option('-i, --input-file [value]', 'Input file')
+  .option('-o, --output-file', 'Output file')
+  .parse(process.argv)
+
+var input = program.args[0] || program.inputFile
+var code = compiler.open_file(input)
+var output = program.outputFile || program.args[1] || 'out.nes'
+
+try {
+  var bin = compiler.nes_compiler(code)
+  compiler.write_file(output, bin)
+} catch (e) {
+  e.forEach(function (error) {
+    console.error(error)
+  })
+  process.exit(1)
+}

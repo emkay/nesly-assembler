@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "6502 assembler in js",
   "main": "index.js",
+  "bin": "cli.js",
   "scripts": {
     "test": "standard"
   },
@@ -23,5 +24,8 @@
   "homepage": "https://github.com/emkay/nesly-assembler",
   "devDependencies": {
     "standard": "^5.3.1"
+  },
+  "dependencies": {
+    "commander": "^2.9.0"
   }
 }
