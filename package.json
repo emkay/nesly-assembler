@@ -4,6 +4,7 @@
   "description": "6502 assembler in js",
   "main": "index.js",
   "scripts": {
+    "release": "standard-version",
     "test": "standard"
   },
   "repository": {
@@ -22,6 +23,7 @@
   },
   "homepage": "https://github.com/emkay/nesly-assembler",
   "devDependencies": {
-    "standard": "^5.3.1"
+    "standard": "^7.0.1",
+    "standard-version": "^2.2.1"
   }
 }
