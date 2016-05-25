@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "release": "standard-version",
-    "test": "standard"
+    "test": "standard",
+    "example": "node cli example/example.s example/example.nes" 
   },
   "repository": {
     "type": "git",
