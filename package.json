@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "6502 assembler in js",
   "main": "index.js",
+  "bin": "cli.js",
   "scripts": {
     "release": "standard-version",
-    "test": "standard"
+    "test": "standard",
+    "example": "node cli example/example.s example/example.nes" 
   },
   "repository": {
     "type": "git",
@@ -25,5 +27,8 @@
   "devDependencies": {
     "standard": "^7.0.1",
     "standard-version": "^2.2.1"
+  },
+  "dependencies": {
+    "commander": "^2.9.0"
   }
 }
