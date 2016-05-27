@@ -5,15 +5,15 @@ var cpu = new CPU()
 var Cartridge = require('./lib/cartridge')
 var Directives = require('./lib/directives')
 var directives = new Directives()
-var asm65_tokens = require('./lib/tokens')
+var asm65Tokens = require('./lib/tokens')
 
 function Compiler () {}
 
-Compiler.prototype.open_file = function (file) {
+Compiler.prototype.openFile = function (file) {
   return fs.readFileSync(file, 'binary')
 }
 
-Compiler.prototype.write_file = function (filename, data) {
+Compiler.prototype.writeFile = function (filename, data) {
   fs.writeFileSync(filename, data, 'binary')
 }
 
@@ -21,7 +21,7 @@ Compiler.prototype.lexical = function (code) {
   return analyse(code)
 }
 
-function look_ahead (tokens, index, type, value) {
+function lookAhead (tokens, index, type, value) {
   if (index > tokens.length - 1) {
     return 0
   }
@@ -34,24 +34,24 @@ function look_ahead (tokens, index, type, value) {
   return 0
 }
 
-function t_instruction (tokens, index) {
-  return look_ahead(tokens, index, 'T_INSTRUCTION')
+function tInstruction (tokens, index) {
+  return lookAhead(tokens, index, 'T_INSTRUCTION')
 }
 
-function t_hex_number (tokens, index) {
-  return look_ahead(tokens, index, 'T_HEX_NUMBER')
+function tHexNumber (tokens, index) {
+  return lookAhead(tokens, index, 'T_HEX_NUMBER')
 }
 
-function t_binary_number (tokens, index) {
-  return look_ahead(tokens, index, 'T_BINARY_NUMBER')
+function tBinaryNumber (tokens, index) {
+  return lookAhead(tokens, index, 'T_BINARY_NUMBER')
 }
 
-function t_number (tokens, index) {
-  return OR([t_hex_number, t_binary_number, t_decimal_argument], tokens, index)
+function tNumber (tokens, index) {
+  return OR([tHexNumber, tBinaryNumber, tDecimalArgument], tokens, index)
 }
 
-function t_relative (tokens, index) {
-  if (t_instruction(tokens, index)) {
+function tRelative (tokens, index) {
+  if (tInstruction(tokens, index)) {
     var valid = ['BCC', 'BCS', 'BEQ', 'BNE', 'BMI', 'BPL', 'BVC', 'BVS']
     for (var v in valid) {
       if (tokens[index].value.toUpperCase() === valid[v]) {
@@ -62,75 +62,75 @@ function t_relative (tokens, index) {
   return 0
 }
 
-function t_label (tokens, index) {
-  return look_ahead(tokens, index, 'T_LABEL')
+function tLabel (tokens, index) {
+  return lookAhead(tokens, index, 'T_LABEL')
 }
 
-function t_marker (tokens, index) {
-  return look_ahead(tokens, index, 'T_MARKER')
+function tMarker (tokens, index) {
+  return lookAhead(tokens, index, 'T_MARKER')
 }
 
-function t_address_or_t_binary_number_or_t_decimal_argument (tokens, index) {
-  return OR([t_address, t_binary_number, t_decimal_argument], tokens, index)
+function tAddressOrTBinaryNumberOrTDecimalArgument (tokens, index) {
+  return OR([tAddress, tBinaryNumber, tDecimalArgument], tokens, index)
 }
 
-function t_address_or_t_marker (tokens, index) {
-  return OR([t_address, t_marker], tokens, index)
+function tAddressOrTMarker (tokens, index) {
+  return OR([tAddress, tMarker], tokens, index)
 }
 
-function t_address (tokens, index) {
-  return look_ahead(tokens, index, 'T_ADDRESS')
+function tAddress (tokens, index) {
+  return lookAhead(tokens, index, 'T_ADDRESS')
 }
 
-function t_zeropage (tokens, index) {
-  if (t_address(tokens, index) && tokens[index].value.length === 3) {
+function tZeropage (tokens, index) {
+  if (tAddress(tokens, index) && tokens[index].value.length === 3) {
     return 1
   }
   return 0
 }
 
-function t_separator (tokens, index) {
-  return look_ahead(tokens, index, 'T_SEPARATOR', ',')
+function tSeparator (tokens, index) {
+  return lookAhead(tokens, index, 'T_SEPARATOR', ',')
 }
 
-function t_accumulator (tokens, index) {
-  return look_ahead(tokens, index, 'T_ACCUMULATOR', 'A')
+function tAccumulator (tokens, index) {
+  return lookAhead(tokens, index, 'T_ACCUMULATOR', 'A')
 }
 
-function t_register_x (tokens, index) {
-  return look_ahead(tokens, index, 'T_REGISTER', 'X')
+function tRegisterX (tokens, index) {
+  return lookAhead(tokens, index, 'T_REGISTER', 'X')
 }
 
-function t_register_y (tokens, index) {
-  return look_ahead(tokens, index, 'T_REGISTER', 'Y')
+function tRegisterY (tokens, index) {
+  return lookAhead(tokens, index, 'T_REGISTER', 'Y')
 }
 
-function t_open (tokens, index) {
-  return look_ahead(tokens, index, 'T_OPEN', '(')
+function tOpen (tokens, index) {
+  return lookAhead(tokens, index, 'T_OPEN', '(')
 }
 
-function t_close (tokens, index) {
-  return look_ahead(tokens, index, 'T_CLOSE', ')')
+function tClose (tokens, index) {
+  return lookAhead(tokens, index, 'T_CLOSE', ')')
 }
 
-function t_open_square_brackets (tokens, index) {
-  return look_ahead(tokens, index, 'T_OPEN_SQUARE_BRACKETS', '[')
+function tOpenSquareBrackets (tokens, index) {
+  return lookAhead(tokens, index, 'T_OPEN_SQUARE_BRACKETS', '[')
 }
 
-function t_close_square_brackets (tokens, index) {
-  return look_ahead(tokens, index, 'T_CLOSE_SQUARE_BRACKETS', ']')
+function tCloseSquareBrackets (tokens, index) {
+  return lookAhead(tokens, index, 'T_CLOSE_SQUARE_BRACKETS', ']')
 }
 
-function t_nesasm_compatible_open (tokens, index) {
-  return OR([t_open, t_open_square_brackets], tokens, index)
+function tNesasmCompatibleOpen (tokens, index) {
+  return OR([tOpen, tOpenSquareBrackets], tokens, index)
 }
 
-function t_nesasm_compatible_close (tokens, index) {
-  return OR([t_close, t_close_square_brackets], tokens, index)
+function tNesasmCompatibleClose (tokens, index) {
+  return OR([tClose, tCloseSquareBrackets], tokens, index)
 }
 
-function t_endline (tokens, index) {
-  return look_ahead(tokens, index, 'T_ENDLINE', '\n')
+function tEndline (tokens, index) {
+  return lookAhead(tokens, index, 'T_ENDLINE', '\n')
 }
 
 function OR (args, tokens, index) {
@@ -142,34 +142,34 @@ function OR (args, tokens, index) {
   return 0
 }
 
-function t_modifier (tokens, index) {
-  return look_ahead(tokens, index, 'T_MODIFIER')
+function tModifier (tokens, index) {
+  return lookAhead(tokens, index, 'T_MODIFIER')
 }
 
-function t_directive (tokens, index) {
-  return look_ahead(tokens, index, 'T_DIRECTIVE')
+function tDirective (tokens, index) {
+  return lookAhead(tokens, index, 'T_DIRECTIVE')
 }
 
-function t_directive_argument (tokens, index) {
-  return OR([t_list, t_address, t_binary_number, t_marker, t_decimal_argument, t_string], tokens, index)
+function tDirectiveArgument (tokens, index) {
+  return OR([tList, tAddress, tBinaryNumber, tMarker, tDecimalArgument, tString], tokens, index)
 }
 
-function t_decimal_argument (tokens, index) {
-  return look_ahead(tokens, index, 'T_DECIMAL_ARGUMENT')
+function tDecimalArgument (tokens, index) {
+  return lookAhead(tokens, index, 'T_DECIMAL_ARGUMENT')
 }
 
-function t_string (tokens, index) {
-  return look_ahead(tokens, index, 'T_STRING')
+function tString (tokens, index) {
+  return lookAhead(tokens, index, 'T_STRING')
 }
 
-function t_list (tokens, index) {
-  if (t_address_or_t_binary_number_or_t_decimal_argument(tokens, index) && t_separator(tokens, index + 1)) {
+function tList (tokens, index) {
+  if (tAddressOrTBinaryNumberOrTDecimalArgument(tokens, index) && tSeparator(tokens, index + 1)) {
     var islist = 1
     var arg = 0
     while (islist) {
-      islist = islist & t_separator(tokens, index + (arg * 2) + 1)
-      islist = islist & t_address_or_t_binary_number_or_t_decimal_argument(tokens, index + (arg * 2) + 2)
-      if (t_endline(tokens, index + (arg * 2) + 3) || index + (arg * 2) + 3 === tokens.length) {
+      islist = islist & tSeparator(tokens, index + (arg * 2) + 1)
+      islist = islist & tAddressOrTBinaryNumberOrTDecimalArgument(tokens, index + (arg * 2) + 2)
+      if (tEndline(tokens, index + (arg * 2) + 3) || index + (arg * 2) + 3 === tokens.length) {
         break
       }
       arg++
@@ -181,22 +181,22 @@ function t_list (tokens, index) {
   return 0
 }
 
-var asm65_bnf = [
-  {type: 'S_RS', bnf: [t_marker, t_directive, t_directive_argument]},
-  {type: 'S_DIRECTIVE', bnf: [t_directive, t_directive_argument]},
-  {type: 'S_RELATIVE', bnf: [t_relative, t_address_or_t_marker]},
-  {type: 'S_IMMEDIATE', bnf: [t_instruction, t_number]},
-  {type: 'S_IMMEDIATE_WITH_MODIFIER', bnf: [t_instruction, t_modifier, t_open, t_address_or_t_marker, t_close]}, // nesasm hack
-  {type: 'S_ACCUMULATOR', bnf: [t_instruction, t_accumulator]},
-  {type: 'S_ZEROPAGE_X', bnf: [t_instruction, t_zeropage, t_separator, t_register_x]},
-  {type: 'S_ZEROPAGE_Y', bnf: [t_instruction, t_zeropage, t_separator, t_register_y]},
-  {type: 'S_ZEROPAGE', bnf: [t_instruction, t_zeropage]},
-  {type: 'S_ABSOLUTE_X', bnf: [t_instruction, t_address_or_t_marker, t_separator, t_register_x]},
-  {type: 'S_ABSOLUTE_Y', bnf: [t_instruction, t_address_or_t_marker, t_separator, t_register_y]},
-  {type: 'S_ABSOLUTE', bnf: [t_instruction, t_address_or_t_marker]},
-  {type: 'S_INDIRECT_X', bnf: [t_instruction, t_nesasm_compatible_open, t_address_or_t_marker, t_separator, t_register_x, t_nesasm_compatible_close]},
-  {type: 'S_INDIRECT_Y', bnf: [t_instruction, t_nesasm_compatible_open, t_address_or_t_marker, t_nesasm_compatible_close, t_separator, t_register_y]},
-  {type: 'S_IMPLIED', bnf: [t_instruction]}
+var asm65Bnf = [
+  {type: 'S_RS', bnf: [tMarker, tDirective, tDirectiveArgument]},
+  {type: 'S_DIRECTIVE', bnf: [tDirective, tDirectiveArgument]},
+  {type: 'S_RELATIVE', bnf: [tRelative, tAddressOrTMarker]},
+  {type: 'S_IMMEDIATE', bnf: [tInstruction, tNumber]},
+  {type: 'S_IMMEDIATE_WITH_MODIFIER', bnf: [tInstruction, tModifier, tOpen, tAddressOrTMarker, tClose]}, // nesasm hack
+  {type: 'S_ACCUMULATOR', bnf: [tInstruction, tAccumulator]},
+  {type: 'S_ZEROPAGE_X', bnf: [tInstruction, tZeropage, tSeparator, tRegisterX]},
+  {type: 'S_ZEROPAGE_Y', bnf: [tInstruction, tZeropage, tSeparator, tRegisterY]},
+  {type: 'S_ZEROPAGE', bnf: [tInstruction, tZeropage]},
+  {type: 'S_ABSOLUTE_X', bnf: [tInstruction, tAddressOrTMarker, tSeparator, tRegisterX]},
+  {type: 'S_ABSOLUTE_Y', bnf: [tInstruction, tAddressOrTMarker, tSeparator, tRegisterY]},
+  {type: 'S_ABSOLUTE', bnf: [tInstruction, tAddressOrTMarker]},
+  {type: 'S_INDIRECT_X', bnf: [tInstruction, tNesasmCompatibleOpen, tAddressOrTMarker, tSeparator, tRegisterX, tNesasmCompatibleClose]},
+  {type: 'S_INDIRECT_Y', bnf: [tInstruction, tNesasmCompatibleOpen, tAddressOrTMarker, tNesasmCompatibleClose, tSeparator, tRegisterY]},
+  {type: 'S_IMPLIED', bnf: [tInstruction]}
 ]
 
 Compiler.prototype.syntax = function (tokens) {
@@ -206,22 +206,22 @@ Compiler.prototype.syntax = function (tokens) {
   var erros = []
   var move = false
   while (x < tokens.length) {
-    if (t_label(tokens, x)) {
-      labels.push(get_value(tokens[x]))
+    if (tLabel(tokens, x)) {
+      labels.push(getValue(tokens[x]))
       x++
-    } else if (t_endline(tokens, x)) {
+    } else if (tEndline(tokens, x)) {
       x++
     } else {
-      for (var bnf in asm65_bnf) {
+      for (var bnf in asm65Bnf) {
         var leaf = {}
-        var look_ahead = 0
+        var lookAhead = 0 // TODO: confusing to have a func and var named this
         move = false
-        for (var i in asm65_bnf[bnf].bnf) {
-          move = asm65_bnf[bnf].bnf[i](tokens, x + look_ahead)
+        for (var i in asm65Bnf[bnf].bnf) {
+          move = asm65Bnf[bnf].bnf[i](tokens, x + lookAhead)
           if (!move) {
             break
           }
-          look_ahead++
+          lookAhead++
         }
         if (move) {
           if (labels.length > 0) {
@@ -229,13 +229,13 @@ Compiler.prototype.syntax = function (tokens) {
             labels = []
           }
           var size = 0
-          look_ahead = 0
-          for (var b in asm65_bnf[bnf].bnf) {
-            size += asm65_bnf[bnf].bnf[b](tokens, x + look_ahead)
-            look_ahead++
+          lookAhead = 0
+          for (var b in asm65Bnf[bnf].bnf) {
+            size += asm65Bnf[bnf].bnf[b](tokens, x + lookAhead)
+            lookAhead++
           }
           leaf.children = tokens.slice(x, x + size)
-          leaf.type = asm65_bnf[bnf].type
+          leaf.type = asm65Bnf[bnf].type
           ast.push(leaf)
           x += size
           break
@@ -243,7 +243,7 @@ Compiler.prototype.syntax = function (tokens) {
       }
       if (!move) {
         var walk = 0
-        while (!t_endline(tokens, x + walk) && x + walk < tokens.length) {
+        while (!tEndline(tokens, x + walk) && x + walk < tokens.length) {
           walk++
         }
         var erro = {}
@@ -266,21 +266,21 @@ Compiler.prototype.syntax = function (tokens) {
   return ast
 }
 
-function get_value (token, labels) {
+function getValue (token, labels) {
   var m
   if (token.type === 'T_ADDRESS') {
-    m = asm65_tokens[1].regex.exec(token.value)
+    m = asm65Tokens[1].regex.exec(token.value)
     return parseInt(m[2], 16)
   } else if (token.type === 'T_HEX_NUMBER') {
-    m = asm65_tokens[2].regex.exec(token.value)
+    m = asm65Tokens[2].regex.exec(token.value)
     return parseInt(m[2], 16)
   } else if (token.type === 'T_BINARY_NUMBER') {
-    m = asm65_tokens[3].regex.exec(token.value)
+    m = asm65Tokens[3].regex.exec(token.value)
     return parseInt(m[2], 2)
   } else if (token.type === 'T_DECIMAL_ARGUMENT') {
     return parseInt(token.value, 10)
   } else if (token.type === 'T_LABEL') {
-    m = asm65_tokens[4].regex.exec(token.value)
+    m = asm65Tokens[4].regex.exec(token.value)
     return m[2]
   } else if (token.type === 'T_MARKER') {
     return labels[token.value]
@@ -290,7 +290,7 @@ function get_value (token, labels) {
   throw new Error('Could not get that value')
 }
 
-Compiler.prototype.get_labels = function (ast) {
+Compiler.prototype.getLabels = function (ast) {
   var labels = {}
   var address = 0
   ast.forEach(function (leaf) {
@@ -301,7 +301,7 @@ Compiler.prototype.get_labels = function (ast) {
       labels[leaf.labels[0]] = address
     }
     if (leaf.type !== 'S_DIRECTIVE' && leaf.type !== 'S_RS') {
-      var size = cpu.address_mode_def[leaf.type].size
+      var size = cpu.addressModeDef[leaf.type].size
       address += size
     } else if (leaf.type === 'S_DIRECTIVE' && leaf.children[0].value === '.db') {
       for (var i in leaf.children) {
@@ -318,7 +318,7 @@ Compiler.prototype.get_labels = function (ast) {
 
 Compiler.prototype.semantic = function (ast, iNES) {
   var cart = new Cartridge()
-  var labels = this.get_labels(ast)
+  var labels = this.getLabels(ast)
   // find all labels o the symbol table
   var erros = []
   var erro
@@ -328,17 +328,17 @@ Compiler.prototype.semantic = function (ast, iNES) {
     if (leaf.type === 'S_RS') {
       // marker
       labels[leaf.children[0].value] = cart.rs
-      cart.rs += get_value(leaf.children[2])
+      cart.rs += getValue(leaf.children[2])
     } else if (leaf.type === 'S_DIRECTIVE') {
       var directive = leaf.children[0].value
       var argument
       if (leaf.children.length === 2) {
-        argument = get_value(leaf.children[1], labels)
+        argument = getValue(leaf.children[1], labels)
       } else {
         argument = leaf.children.slice(1, leaf.children.length)
       }
-      if (directives.directive_list[directive] !== undefined) {
-        directives.directive_list[directive](argument, cart)
+      if (directives.directiveList[directive] !== undefined) {
+        directives.directiveList[directive](argument, cart)
       } else {
         erro = {}
         erro.type = 'Unknown Directive'
@@ -355,7 +355,7 @@ Compiler.prototype.semantic = function (ast, iNES) {
           break
         case 'S_RELATIVE':
           instruction = leaf.children[0].value
-          address = get_value(leaf.children[1], labels)
+          address = getValue(leaf.children[1], labels)
           address = 126 + (address - cart.pc)
           if (address === 128) {
             address = 0
@@ -368,7 +368,7 @@ Compiler.prototype.semantic = function (ast, iNES) {
         case 'S_IMMEDIATE_WITH_MODIFIER':
           instruction = leaf.children[0].value
           var modifier = leaf.children[1].value
-          address = get_value(leaf.children[3], labels)
+          address = getValue(leaf.children[3], labels)
           if (modifier === '#LOW') {
             address = (address & 0x00ff)
           } else if (modifier === '#HIGH') {
@@ -383,30 +383,30 @@ Compiler.prototype.semantic = function (ast, iNES) {
         case 'S_ABSOLUTE_X':
         case 'S_ABSOLUTE_Y':
           instruction = leaf.children[0].value
-          address = get_value(leaf.children[1], labels)
+          address = getValue(leaf.children[1], labels)
           break
         case 'S_INDIRECT_X':
         case 'S_INDIRECT_Y':
           instruction = leaf.children[0].value
-          address = get_value(leaf.children[2], labels)
+          address = getValue(leaf.children[2], labels)
           break
       }
-      var address_mode = cpu.address_mode_def[leaf.type].short
-      var opcode = cpu.opcodes[instruction.toUpperCase()][address_mode]
+      var addressMode = cpu.addressModeDef[leaf.type].short
+      var opcode = cpu.opcodes[instruction.toUpperCase()][addressMode]
       if (opcode === undefined) {
         erro = {}
         erro.type = 'SEMANTIC ERROR'
         erro.msg = 'invalid opcode'
         erro.sentence = leaf
         erros.push(erro)
-      } else if (address_mode === 'sngl' || address_mode === 'acc') {
-        cart.append_code([opcode])
-      } else if (cpu.address_mode_def[leaf.type].size === 2) {
-        cart.append_code([opcode, address])
+      } else if (addressMode === 'sngl' || addressMode === 'acc') {
+        cart.appendCode([opcode])
+      } else if (cpu.addressModeDef[leaf.type].size === 2) {
+        cart.appendCode([opcode, address])
       } else {
         var arg1 = (address & 0x00ff)
         var arg2 = (address & 0xff00) >> 8
-        cart.append_code([opcode, arg1, arg2])
+        cart.appendCode([opcode, arg1, arg2])
       }
     }
   })
@@ -418,13 +418,13 @@ Compiler.prototype.semantic = function (ast, iNES) {
     throw e
   }
   if (iNES) {
-    return cart.get_ines_code()
+    return cart.getInesCode()
   } else {
-    return cart.get_code()
+    return cart.getCode()
   }
 }
 
-Compiler.prototype.nes_compiler = function (code) {
+Compiler.prototype.nesCompiler = function (code) {
   var tokens
   var erros = []
   try {
