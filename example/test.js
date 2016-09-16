@@ -1,11 +1,11 @@
 var Compiler = require('..')
 var compiler = new Compiler()
 
-var code = compiler.open_file('./build/start.s')
+var code = compiler.openFile('./build/start.s')
 
 try {
-  var bin = compiler.nes_compiler(code)
-  compiler.write_file('./build/out.nes', bin)
+  var bin = compiler.nesCompiler(code)
+  compiler.writeFile('./build/out.nes', bin)
 } catch (e) {
   e.forEach(function (error) {
     console.error(error)

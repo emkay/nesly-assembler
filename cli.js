@@ -16,12 +16,12 @@ program
   .parse(process.argv)
 
 var input = program.args[0] || program.inputFile
-var code = compiler.open_file(input)
+var code = compiler.openFile(input)
 var output = program.outputFile || program.args[1] || 'out.nes'
 
 try {
-  var bin = compiler.nes_compiler(code)
-  compiler.write_file(output, bin)
+  var bin = compiler.nesCompiler(code)
+  compiler.writeFile(output, bin)
 } catch (e) {
   e.forEach(function (error) {
     console.error(error)
