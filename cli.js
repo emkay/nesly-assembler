@@ -1,5 +1,6 @@
 #!/usr/bin/node
 
+var log = require('bole')('cli')
 var program = require('commander')
 var Compiler = require('./index')
 var compiler = new Compiler()
@@ -24,7 +25,7 @@ try {
   compiler.writeFile(output, bin)
 } catch (e) {
   e.forEach(function (error) {
-    console.error(error)
+    log.error('Error: ', error)
   })
   process.exit(1)
 }

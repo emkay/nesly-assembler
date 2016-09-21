@@ -7,7 +7,7 @@
   "scripts": {
     "release": "standard-version",
     "test": "standard",
-    "example": "node cli example/example.s example/example.nes" 
+    "example": "node cli example/example.s example/example.nes | garnish --level warn"
   },
   "repository": {
     "type": "git",
@@ -25,10 +25,12 @@
   },
   "homepage": "https://github.com/emkay/nesly-assembler",
   "devDependencies": {
+    "garnish": "^5.2.0",
     "standard": "^7.0.1",
     "standard-version": "^2.2.1"
   },
   "dependencies": {
+    "bole": "^3.0.1",
     "commander": "^2.9.0"
   }
 }

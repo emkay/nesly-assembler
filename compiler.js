@@ -1,23 +1,27 @@
-var fs = require('fs')
-var analyse = require('./lib/analyzer')
-var CPU = require('./lib/c6502')
-var cpu = new CPU()
-var Cartridge = require('./lib/cartridge')
-var Directives = require('./lib/directives')
-var directives = new Directives()
-var asm65Tokens = require('./lib/tokens')
+const fs = require('fs')
+const log = require('bole')('compiler')
+const analyse = require('./lib/analyzer')
+const CPU = require('./lib/c6502')
+const cpu = new CPU()
+const Cartridge = require('./lib/cartridge')
+const Directives = require('./lib/directives')
+const directives = new Directives()
+const asm65Tokens = require('./lib/tokens')
 
 function Compiler () {}
 
 Compiler.prototype.openFile = function (file) {
+  log.info('openFile', file)
   return fs.readFileSync(file, 'binary')
 }
 
 Compiler.prototype.writeFile = function (filename, data) {
+  log.info('writeFile')
   fs.writeFileSync(filename, data, 'binary')
 }
 
 Compiler.prototype.lexical = function (code) {
+  log.info('lexical')
   return analyse(code)
 }
 
@@ -200,6 +204,7 @@ var asm65Bnf = [
 ]
 
 Compiler.prototype.syntax = function (tokens) {
+  log.info('syntax')
   var ast = []
   var x = 0
   var labels = []
@@ -207,6 +212,7 @@ Compiler.prototype.syntax = function (tokens) {
   var move = false
   while (x < tokens.length) {
     if (tLabel(tokens, x)) {
+      log.info('pushing label ', getValue(tokens[x]))
       labels.push(getValue(tokens[x]))
       x++
     } else if (tEndline(tokens, x)) {
@@ -291,6 +297,7 @@ function getValue (token, labels) {
 }
 
 Compiler.prototype.getLabels = function (ast) {
+  log.warn('getLabels')
   var labels = {}
   var address = 0
   ast.forEach(function (leaf) {
@@ -298,9 +305,11 @@ Compiler.prototype.getLabels = function (ast) {
       address = parseInt(leaf.children[1].value.substr(1), 16)
     }
     if (leaf.labels !== undefined) {
+      log.warn('leaf:', leaf)
       labels[leaf.labels[0]] = address
     }
     if (leaf.type !== 'S_DIRECTIVE' && leaf.type !== 'S_RS') {
+      log.warn('cpu:', cpu)
       var size = cpu.addressModeDef[leaf.type].size
       address += size
     } else if (leaf.type === 'S_DIRECTIVE' && leaf.children[0].value === '.db') {
@@ -317,8 +326,11 @@ Compiler.prototype.getLabels = function (ast) {
 }
 
 Compiler.prototype.semantic = function (ast, iNES) {
+  log.warn('semantic')
   var cart = new Cartridge()
+  log.warn('cart', cart)
   var labels = this.getLabels(ast)
+  log.warn('labels', labels)
   // find all labels o the symbol table
   var erros = []
   var erro
@@ -425,10 +437,12 @@ Compiler.prototype.semantic = function (ast, iNES) {
 }
 
 Compiler.prototype.nesCompiler = function (code) {
+  log.info('nesCompiler')
   var tokens
   var erros = []
   try {
     tokens = this.lexical(code)
+    log.info(tokens)
   } catch (e) {
     tokens = e.tokens
     erros = erros.concat(e.message)
@@ -447,6 +461,7 @@ Compiler.prototype.nesCompiler = function (code) {
     erros = erros.concat(e.message)
   }
   if (erros.length > 0) {
+    log.error('ERROR:', erros)
     throw erros
   } else {
     return String.fromCharCode.apply(undefined, opcodes)
