@@ -1,4 +1,6 @@
 # nesly-assembler
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/emkay/nesly-assembler.svg)](https://greenkeeper.io/)
 javascript assembler for 6502 asm
 
 ## nodeNES
